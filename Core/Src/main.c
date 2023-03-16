@@ -50,7 +50,7 @@ UART_HandleTypeDef huart2;
 uint32_t InputCaptureBuffer[IC_BUFFER_SIZE];
 float averageRisingedgePeriod;
 
-float MotorSetDuty = 50;
+int MotorSetDuty = 50;
 
 float MotorRound = 0;
 
@@ -59,7 +59,7 @@ float MotorReadRPM = 0;
 
 int MotorControlEnable = 0;
 
-float RPM = 0;
+float error = 0;
 
 //int A = 0;
 //int B = 0;
@@ -69,6 +69,7 @@ int X = 0;
 int Y = 0;
 int Z = 0;
 
+int M = 0;
 
 /* USER CODE END PV */
 
@@ -152,6 +153,7 @@ int main(void)
 		  else if(MotorControlEnable == 0)
 		  {
 			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,MotorSetDuty);
+			  MotorSetRPM = 0;
 			  VelocityRPM();
 		  }
 
@@ -183,9 +185,9 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  RCC_OscInitStruct.PLL.PLLM = 16;
-  RCC_OscInitStruct.PLL.PLLN = 336;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV4;
+  RCC_OscInitStruct.PLL.PLLM = 8;
+  RCC_OscInitStruct.PLL.PLLN = 100;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 4;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -201,7 +203,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK)
   {
     Error_Handler();
   }
@@ -453,18 +455,32 @@ void VelocityRPM()
 
 void ControlRPM()
 {
+
 //	A = (MotorSetDuty * MotorSetDuty * MotorSetDuty)/0.00004;
 //	B = (0.0104 * MotorSetDuty * MotorSetDuty);
 //	C = (0.9335 * MotorSetDuty);
 
+//	M = MotorSetRPM;
 	X = (0.0149 * MotorSetRPM * MotorSetRPM * MotorSetRPM);
 	Y = 0.4486 * MotorSetRPM * MotorSetRPM;
 	Z = 4.6785 * MotorSetRPM;
-
-//	y = 4E-05x3 - 0.0104x2 + 0.9335x - 2.8634;
-//	RPM = A - B + C - 2.8634;
-//	y = 0.0149x3 - 0.4486x2 + 4.6785x + 1.3633;
+//
+////	y = 4E-05x3 - 0.0104x2 + 0.9335x - 2.8634;
+////	RPM = A - B + C - 2.8634;
+////	y = 0.0149x3 - 0.4486x2 + 4.6785x + 1.3633;
 	MotorSetDuty = X - Y + Z + 1.3633;
+
+	error = MotorSetRPM - MotorReadRPM;
+
+	if (MotorReadRPM < MotorSetRPM)
+	{
+		MotorSetDuty += 10;
+	}
+
+//	y = 0.0291x3 - 0.7718x2 + 6.5234x - 1.1758
+
+//	MotorSetDuty = (0.0291/M*M*M) - (0.7718*M*M) + (6.5234*M) - 1.1758;
+
 
 
 }
