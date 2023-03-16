@@ -138,6 +138,7 @@ int main(void)
 	  static uint32_t timestamp = 0;
 	  if(HAL_GetTick() >= timestamp)
 	  {
+
 		  timestamp = HAL_GetTick() + 50;
 		  averageRisingedgePeriod = IC_Calc_Period();
 		  VelocityRPM();
