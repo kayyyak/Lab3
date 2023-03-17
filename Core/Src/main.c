@@ -142,7 +142,6 @@ int main(void)
 
 		  timestamp = HAL_GetTick() + 50;
 		  averageRisingedgePeriod = IC_Calc_Period();
-		  VelocityRPM();
 		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,MotorSetDuty);
 
 		  if(MotorControlEnable == 1)
@@ -152,7 +151,7 @@ int main(void)
 		  }
 		  else if(MotorControlEnable == 0)
 		  {
-			  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,MotorSetDuty);
+			  error = 0;
 			  MotorSetRPM = 0;
 			  VelocityRPM();
 		  }
@@ -456,32 +455,8 @@ void VelocityRPM()
 void ControlRPM()
 {
 
-//	A = (MotorSetDuty * MotorSetDuty * MotorSetDuty)/0.00004;
-//	B = (0.0104 * MotorSetDuty * MotorSetDuty);
-//	C = (0.9335 * MotorSetDuty);
-
-//	M = MotorSetRPM;
-	X = (0.0149 * MotorSetRPM * MotorSetRPM * MotorSetRPM);
-	Y = 0.4486 * MotorSetRPM * MotorSetRPM;
-	Z = 4.6785 * MotorSetRPM;
-//
-////	y = 4E-05x3 - 0.0104x2 + 0.9335x - 2.8634;
-////	RPM = A - B + C - 2.8634;
-////	y = 0.0149x3 - 0.4486x2 + 4.6785x + 1.3633;
-	MotorSetDuty = X - Y + Z + 1.3633;
-
-	error = MotorSetRPM - MotorReadRPM;
-
-	if (MotorReadRPM < MotorSetRPM)
-	{
-		MotorSetDuty += 10;
-	}
-
-//	y = 0.0291x3 - 0.7718x2 + 6.5234x - 1.1758
-
-//	MotorSetDuty = (0.0291/M*M*M) - (0.7718*M*M) + (6.5234*M) - 1.1758;
-
-
+	error = MotorSetRPM -MotorReadRPM;
+	MotorSetDuty = (0.0255 * MotorSetRPM * MotorSetRPM * MotorSetRPM) - (0.7179 * MotorSetRPM * MotorSetRPM) + (6.9648 * MotorSetRPM) + 2.6048;
 
 }
 /* USER CODE END 4 */
