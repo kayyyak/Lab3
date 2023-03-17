@@ -47,29 +47,15 @@ DMA_HandleTypeDef hdma_tim2_ch1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
+
 uint32_t InputCaptureBuffer[IC_BUFFER_SIZE];
 float averageRisingedgePeriod;
-
 int MotorSetDuty = 50;
-
 float MotorRound = 0;
-
 float MotorSetRPM = 0;
 float MotorReadRPM = 0;
-
 int MotorControlEnable = 0;
-
 float error = 0;
-
-//int A = 0;
-//int B = 0;
-//int C = 0;
-
-int X = 0;
-int Y = 0;
-int Z = 0;
-
-int M = 0;
 
 /* USER CODE END PV */
 
@@ -139,9 +125,9 @@ int main(void)
 	  static uint32_t timestamp = 0;
 	  if(HAL_GetTick() >= timestamp)
 	  {
-
 		  timestamp = HAL_GetTick() + 50;
 		  averageRisingedgePeriod = IC_Calc_Period();
+		  VelocityRPM();
 		  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,MotorSetDuty);
 
 		  if(MotorControlEnable == 1)
@@ -155,7 +141,6 @@ int main(void)
 			  MotorSetRPM = 0;
 			  VelocityRPM();
 		  }
-
 	  }
 
   }
@@ -229,9 +214,9 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 83;
+  htim1.Init.Prescaler = (1000000/500000)-1;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 99;
+  htim1.Init.Period = 100;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -454,10 +439,9 @@ void VelocityRPM()
 
 void ControlRPM()
 {
-
 	error = MotorSetRPM -MotorReadRPM;
 	MotorSetDuty = (0.0255 * MotorSetRPM * MotorSetRPM * MotorSetRPM) - (0.7179 * MotorSetRPM * MotorSetRPM) + (6.9648 * MotorSetRPM) + 2.6048;
-
+//	y = 0.0255x3 - 0.7179x2 + 6.9648x + 2.6048;
 }
 /* USER CODE END 4 */
 
